@@ -45,8 +45,7 @@ class Post(CreatedModel):
         blank=True
     )
 
-    class Meta:
-        ordering = ('-pub_date',)
+    class Meta(CreatedModel.Meta):
         verbose_name = 'Пост'
         verbose_name_plural = 'Посты'
 
@@ -72,8 +71,7 @@ class Comment(CreatedModel):
         verbose_name='Автор',
     )
 
-    class Meta:
-        ordering = ('-pub_date',)
+    class Meta(CreatedModel.Meta):
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
 

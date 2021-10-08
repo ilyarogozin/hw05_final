@@ -33,13 +33,11 @@ def group_posts(request, slug):
 
 def profile(request, username):
     author = get_object_or_404(User, username=username)
-    if request.user.is_authenticated:
-        if request.user == author:
-            following = False
-        else:
-            following = Follow.objects.filter(user=request.user,
-                                              author=author).exists()
-    following = False
+    if not request.user.is_authenticated or request.user == author:
+        following = False
+    else:
+        following = Follow.objects.filter(user=request.user,
+                                          author=author).exists()
     context = {
         'page_obj': get_page(request, author.posts.all()),
         'author': author,
