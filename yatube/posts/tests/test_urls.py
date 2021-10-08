@@ -14,6 +14,12 @@ PROFILE_URL = reverse('posts:profile', args=[USERNAME])
 GROUP_LIST_URL = reverse('posts:group_list', args=[SLUG])
 LOGIN_URL = reverse('users:login')
 POST_CREATE_REDIRECT_TO_LOGIN_URL = f'{ LOGIN_URL }?next={ POST_CREATE_URL }'
+FOLLOW_INDEX_URL = reverse('posts:follow_index')
+FOLLOW_URL = reverse('posts:profile_follow', args=[USERNAME])
+UNFOLLOW_URL = reverse('posts:profile_unfollow', args=[USERNAME])
+FOLLOW_REDIRECT_TO_LOGIN_URL = f'{ LOGIN_URL }?next={ FOLLOW_URL }'
+UNFOLLOW_REDIRECT_TO_LOGIN_URL = f'{ LOGIN_URL }?next={ UNFOLLOW_URL }'
+FOLLOW_INDEX_REDIRECT_TO_LOGIN_URL = f'{ LOGIN_URL }?next={ FOLLOW_INDEX_URL}'
 
 
 class PostURLTests(TestCase):
@@ -24,6 +30,13 @@ class PostURLTests(TestCase):
         cls.user_not_author_post = User.objects.create_user(
             username='NotAuthorPost'
         )
+        cls.guest_client = Client()
+        cls.authorized_client = Client()
+        cls.not_author_of_post_client = Client()
+        cls.not_author_of_post_client.force_login(
+            cls.user_not_author_post
+        )
+        cls.authorized_client.force_login(cls.user)
         cls.post = Post.objects.create(
             text='Тест текст',
             author=cls.user,
@@ -49,15 +62,6 @@ class PostURLTests(TestCase):
             description='Тест описание',
         )
 
-    def setUp(self):
-        self.guest_client = Client()
-        self.authorized_client = Client()
-        self.not_author_of_post_client = Client()
-        self.not_author_of_post_client.force_login(
-            self.user_not_author_post
-        )
-        self.authorized_client.force_login(self.user)
-
     def test_urls_uses_correct_template(self):
         template_urls_names = {
             INDEX_URL: 'posts/index.html',
@@ -66,6 +70,7 @@ class PostURLTests(TestCase):
             GROUP_LIST_URL: 'posts/group_list.html',
             self.POST_DETAIL_URL: 'posts/post_detail.html',
             PROFILE_URL: 'posts/profile.html',
+            FOLLOW_INDEX_URL: 'posts/follow.html',
         }
         for address, template in template_urls_names.items():
             with self.subTest(address=address):
@@ -83,6 +88,10 @@ class PostURLTests(TestCase):
             [self.POST_EDIT_URL, self.not_author_of_post_client, INDEX_URL],
             [self.COMMENT_CREATE_URL, self.guest_client,
              self.COMMENT_CREATE_REDIRECT_TO_LOGIN_URL],
+            [FOLLOW_URL, self.guest_client, FOLLOW_REDIRECT_TO_LOGIN_URL],
+            [UNFOLLOW_URL, self.guest_client, UNFOLLOW_REDIRECT_TO_LOGIN_URL],
+            [FOLLOW_INDEX_URL, self.guest_client,
+             FOLLOW_INDEX_REDIRECT_TO_LOGIN_URL],
         ]
         for address, client, redirect in cases:
             with self.subTest(redirect=redirect):
@@ -101,11 +110,14 @@ class PostURLTests(TestCase):
             [PROFILE_URL, self.guest_client, HTTPStatus.OK],
             [POST_CREATE_URL, self.guest_client, HTTPStatus.FOUND],
             [self.POST_EDIT_URL, self.guest_client, HTTPStatus.FOUND],
-            [self.COMMENT_CREATE_URL, self.guest_client, HTTPStatus.FOUND],
             [self.POST_EDIT_URL, self.not_author_of_post_client,
              HTTPStatus.FOUND],
             [UNEXISTING_URL, self.guest_client,
              HTTPStatus.NOT_FOUND],
+            [self.COMMENT_CREATE_URL, self.guest_client, HTTPStatus.FOUND],
+            [FOLLOW_INDEX_URL, self.guest_client, HTTPStatus.FOUND],
+            [FOLLOW_URL, self.guest_client, HTTPStatus.FOUND],
+            [UNFOLLOW_URL, self.guest_client, HTTPStatus.FOUND],
         ]
         for address, client, status in cases:
             with self.subTest(address=address):

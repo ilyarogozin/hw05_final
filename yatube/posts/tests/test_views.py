@@ -15,14 +15,21 @@ SLUG = 'test-slug'
 FOREIGN_SLUG = 'test-slug2'
 USERNAME = 'NoName'
 USERNAME_2 = 'NoName2'
-USERNAME_3 = 'NoName3'
 GROUP_LIST_URL = reverse('posts:group_list', args=[SLUG])
 FOREIGN_GROUP_LIST_URL = reverse('posts:group_list', args=[FOREIGN_SLUG])
 INDEX_URL = reverse('posts:index')
-PROFILE_URL = reverse('posts:profile', args=[USERNAME])
-PROFILE_FOLLOW_URL = reverse('posts:profile_follow', args=[USERNAME_2])
-PROFILE_UNFOLLOW_URL = reverse('posts:profile_unfollow', args=[USERNAME_2])
+PROFILE_URL = reverse('posts:profile', args=[USERNAME_2])
+FOLLOW_URL = reverse('posts:profile_follow', args=[USERNAME_2])
+UNFOLLOW_URL = reverse('posts:profile_unfollow', args=[USERNAME_2])
 FOLLOW_INDEX_URL = reverse('posts:follow_index')
+SMALL_GIF = (
+    b'\x47\x49\x46\x38\x39\x61\x02\x00'
+    b'\x01\x00\x80\x00\x00\x00\x00\x00'
+    b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
+    b'\x00\x00\x00\x2C\x00\x00\x00\x00'
+    b'\x02\x00\x01\x00\x00\x02\x02\x0C'
+    b'\x0A\x00\x3B'
+)
 
 
 @override_settings(MEDIA_ROOT=TEMP_MEDIA_ROOT)
@@ -32,7 +39,10 @@ class PostsViewsTests(TestCase):
         super().setUpClass()
         cls.user = User.objects.create_user(username=USERNAME)
         cls.user2 = User.objects.create_user(username=USERNAME_2)
-        cls.user3 = User.objects.create_user(username=USERNAME_3)
+        cls.authorized_client = Client()
+        cls.authorized_client.force_login(cls.user)
+        cls.authorized_client2 = Client()
+        cls.authorized_client2.force_login(cls.user2)
         cls.group = Group.objects.create(
             title='Тест заголовок',
             slug=SLUG,
@@ -43,38 +53,25 @@ class PostsViewsTests(TestCase):
             slug=FOREIGN_SLUG,
             description='Тест описание',
         )
-        small_gif = (
-            b'\x47\x49\x46\x38\x39\x61\x02\x00'
-            b'\x01\x00\x80\x00\x00\x00\x00\x00'
-            b'\xFF\xFF\xFF\x21\xF9\x04\x00\x00'
-            b'\x00\x00\x00\x2C\x00\x00\x00\x00'
-            b'\x02\x00\x01\x00\x00\x02\x02\x0C'
-            b'\x0A\x00\x3B'
-        )
         uploaded = SimpleUploadedFile(
             name='small.gif',
-            content=small_gif,
+            content=SMALL_GIF,
             content_type='image/gif'
         )
         cls.post = Post.objects.create(
             text='Тест текст',
-            author=cls.user,
+            author=cls.user2,
             group=cls.group,
             image=uploaded,
         )
         cls.POST_EDIT_URL = reverse('posts:post_edit', args=[cls.post.pk])
         cls.POST_DETAIL_URL = reverse('posts:post_detail', args=[cls.post.pk])
+        Follow.objects.create(user=cls.user, author=cls.user2)
 
     @classmethod
     def tearDownClass(cls):
         super().tearDownClass()
         shutil.rmtree(TEMP_MEDIA_ROOT, ignore_errors=True)
-
-    def setUp(self):
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
-        self.authorized_client2 = Client()
-        self.authorized_client2.force_login(self.user3)
 
     def test_pages_show_correct_context(self):
         addresses = [
@@ -82,6 +79,7 @@ class PostsViewsTests(TestCase):
             self.POST_DETAIL_URL,
             GROUP_LIST_URL,
             INDEX_URL,
+            FOLLOW_INDEX_URL,
         ]
         for address in addresses:
             with self.subTest(address=address):
@@ -98,7 +96,7 @@ class PostsViewsTests(TestCase):
 
     def test_profile_page_show_correct_author(self):
         response = self.authorized_client.get(PROFILE_URL)
-        self.assertEqual(response.context['author'], self.user)
+        self.assertEqual(response.context['author'], self.user2)
 
     def test_group_list_page_show_correct_group(self):
         response = self.authorized_client.get(GROUP_LIST_URL)
@@ -111,7 +109,7 @@ class PostsViewsTests(TestCase):
         for post in range(settings.NUM_POSTS):
             Post.objects.create(
                 text='Тест текст',
-                author=self.user,
+                author=self.user2,
                 group=self.group,
             )
         addresses = (
@@ -161,23 +159,23 @@ class PostsViewsTests(TestCase):
             response, self.authorized_client.get(INDEX_URL).content
         )
 
-    def test_authorized_user_can_follow_and_unfollow_authors(self):
-        self.authorized_client.get(PROFILE_FOLLOW_URL)
+    def test_authorized_user_can_follow_authors(self):
+        Follow.objects.all().delete()
+        self.authorized_client.get(FOLLOW_URL)
         self.assertTrue(
             Follow.objects.filter(user=self.user, author=self.user2).exists()
         )
-        self.authorized_client.get(PROFILE_UNFOLLOW_URL)
+
+    def test_authorized_user_can_unfollow_authors(self):
+        self.assertTrue(
+            Follow.objects.filter(user=self.user, author=self.user2).exists()
+        )
+        self.authorized_client.get(UNFOLLOW_URL)
         self.assertFalse(
             Follow.objects.filter(user=self.user, author=self.user2).exists()
         )
 
     def test_new_record_appears_at_follower_feed_and_not_at_foreign_feed(self):
-        Post.objects.all().delete()
-        self.authorized_client.get(PROFILE_FOLLOW_URL)
-        post = Post.objects.create(
-            author=self.user2,
-            text='Тестовый текст',
-        )
         page_obj = (
             self.authorized_client.get(FOLLOW_INDEX_URL).context['page_obj']
         )
@@ -185,5 +183,5 @@ class PostsViewsTests(TestCase):
             self.authorized_client2.get(FOLLOW_INDEX_URL).
             context['page_obj']
         )
-        self.assertIn(post, page_obj)
-        self.assertNotIn(post, foreign_page_obj)
+        self.assertIn(self.post, page_obj)
+        self.assertNotIn(self.post, foreign_page_obj)
