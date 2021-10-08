@@ -7,19 +7,23 @@
     <div class="mb-5">
       <h1>Все посты пользователя {{ author.username }}</h1>
       <h3>Всего постов: {{ author.posts.count }}</h3>
-      {% if following %}
-        <a
-          class="btn btn-lg btn-light"
-          href="{% url 'posts:profile_unfollow' author.username %}"
-          role="button">Отписаться
-        </a>
-      {% else %}
-        {% if request.user != author  %}
-          <a
-            class="btn btn-lg btn-primary"
-            href="{% url 'posts:profile_follow' author.username %}"
-            role="button">Подписаться
-          </a>
+      <h4>Подписки: {{ author.follower.count }}</h4>
+      <h4>Подписчики: {{ author.following.count }}</h4>
+      {% if request.user != author %}
+        {% if request.user.is_authenticated%}
+          {% if following %}
+            <a
+              class="btn btn-lg btn-light"
+              href="{% url 'posts:profile_unfollow' author.username %}"
+              role="button">Отписаться
+            </a>
+          {% else %}
+            <a
+              class="btn btn-lg btn-primary"
+              href="{% url 'posts:profile_follow' author.username %}"
+              role="button">Подписаться
+            </a>
+          {% endif %}
         {% endif %}
       {% endif %}
     </div>
