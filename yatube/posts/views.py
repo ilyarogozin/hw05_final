@@ -106,6 +106,11 @@ def add_comment(request, post_id):
 
 @login_required
 def profile_follow(request, username):
+    author = User.objects.get(username=username)
+    if request.user == author:
+        return redirect('posts:index')
+    elif Follow.objects.filter(user=request.user, author=author).exists():
+        return redirect('posts:index')
     Follow.objects.create(
         user=request.user,
         author=User.objects.get(username=username)
