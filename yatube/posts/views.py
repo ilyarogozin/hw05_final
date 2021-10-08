@@ -119,7 +119,7 @@ def profile_follow(request, username):
 @login_required
 def profile_unfollow(request, username):
     follow = get_object_or_404(
-        Follow, user=request.user, author=User.objects.get(username=username)
+        Follow, user=request.user, author__username=username
     )
     follow.delete()
     return redirect('posts:profile', username=username)
@@ -127,10 +127,8 @@ def profile_unfollow(request, username):
 
 @login_required
 def follow_index(request):
-    follows = Follow.objects.filter(user=request.user)
-    posts = []
-    for follow in follows:
-        posts.extend(follow.author.posts.all())
+    authors = request.user.follower.values_list('author', flat=True)
+    posts = Post.objects.filter(author__id__in=authors)
     context = {
         'page_obj': get_page(request, posts)
     }
