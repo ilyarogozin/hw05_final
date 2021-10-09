@@ -15,6 +15,7 @@
       </aside>
       <article class="col-12 col-md-9">
         {% include 'posts/includes/post.html' %}
+        <hr>
         {% if post.author == user %}
           <a class="btn btn-primary" href="{% url 'posts:post_edit' post.pk %}">
             редактировать запись
