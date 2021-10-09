@@ -14,14 +14,14 @@
         </ul>
       </aside>
       <article class="col-12 col-md-9">
-        {% include 'posts/includes/post.html' %}
+        {% include "posts/includes/post.html" %}
         <hr>
         {% if post.author == user %}
           <a class="btn btn-primary" href="{% url 'posts:post_edit' post.pk %}">
             редактировать запись
           </a>
         {% endif %}
-        {% include 'posts/includes/comments.html' %}
+        {% include "posts/includes/comments.html" %}
       </article>
     </div>
   </div>
