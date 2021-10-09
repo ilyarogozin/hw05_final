@@ -120,5 +120,5 @@ class PostURLTests(TestCase):
             [UNFOLLOW_URL, self.guest_client, HTTPStatus.FOUND],
         ]
         for address, client, status in cases:
-            with self.subTest(address=address):
+            with self.subTest(address=address, client=client):
                 self.assertEqual(client.get(address).status_code, status)

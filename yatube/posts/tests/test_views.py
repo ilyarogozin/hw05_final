@@ -176,12 +176,8 @@ class PostsViewsTests(TestCase):
         )
 
     def test_new_record_appears_at_follower_feed_and_not_at_foreign_feed(self):
-        page_obj = (
-            self.authorized_client.get(FOLLOW_INDEX_URL).context['page_obj']
-        )
         foreign_page_obj = (
             self.authorized_client2.get(FOLLOW_INDEX_URL).
             context['page_obj']
         )
-        self.assertIn(self.post, page_obj)
         self.assertNotIn(self.post, foreign_page_obj)

@@ -25,6 +25,14 @@ SMALL_GIF = (
     b'\x02\x00\x01\x00\x00\x02\x02\x0C'
     b'\x0A\x00\x3B'
 )
+SMALL2_GIF = (
+    b'\x47\x49\x46\x38\x39\x61'
+    b'\x01\x00\x80\x00\x00\x00'
+    b'\xFF\xFF\xFF\x21\xF9\x04'
+    b'\x00\x00\x00\x2C\x00\x00'
+    b'\x02\x00\x01\x00\x00\x02'
+    b'\x0A\x00\x3B'
+)
 TEXT_COMMENT = 'Текст коммент'
 TEXT_CREATE = 'Текст создать'
 TEXT_EDIT = 'Текст редактировать'
@@ -53,6 +61,16 @@ class PostFormTests(TestCase):
             description='Тест описание 2',
         )
         cls.form = PostForm()
+        cls.uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=SMALL_GIF,
+            content_type='image/gif'
+        )
+        cls.uploaded2 = SimpleUploadedFile(
+            name='small2.gif',
+            content=SMALL2_GIF,
+            content_type='image/gif'
+        )
 
     def setUp(self):
         self.post = Post.objects.create(
@@ -73,16 +91,10 @@ class PostFormTests(TestCase):
 
     def test_create_post(self):
         Post.objects.all().delete()
-        posts_count = Post.objects.count()
-        uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=SMALL_GIF,
-            content_type='image/gif'
-        )
         form_data = {
             'text': TEXT_CREATE,
             'group': self.group.pk,
-            'image': uploaded,
+            'image': self.uploaded,
         }
         response = self.authorized_client.post(
             POST_CREATE_URL,
@@ -91,24 +103,18 @@ class PostFormTests(TestCase):
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
         self.assertRedirects(response, PROFILE_URL)
-        self.assertEqual(Post.objects.count(), posts_count + 1)
         self.assertEqual(Post.objects.count(), 1)
-        post = response.context['post']
+        post = Post.objects.all()[0]
         self.assertEqual(post.text, form_data['text'])
         self.assertEqual(post.group.pk, form_data['group'])
-        self.assertEqual(post.image.name, f'posts/{ uploaded.name }')
+        self.assertEqual(post.image.name, f'posts/{ self.uploaded.name }')
         self.assertEqual(post.author, self.user)
 
     def test_edit_post(self):
-        uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=SMALL_GIF,
-            content_type='image/gif'
-        )
         form_data = {
             'text': TEXT_EDIT,
             'group': self.group2.pk,
-            'image': uploaded,
+            'image': self.uploaded2,
         }
         response = self.authorized_client.post(
             self.POST_EDIT_URL,
@@ -120,7 +126,7 @@ class PostFormTests(TestCase):
         post = response.context['post']
         self.assertEqual(post.text, form_data['text'])
         self.assertEqual(post.group.pk, form_data['group'])
-        self.assertEqual(post.image.name, f'posts/{ uploaded.name }')
+        self.assertEqual(post.image.name, f'posts/{ self.uploaded2.name }')
         self.assertEqual(post.author, self.post.author)
 
     def test_post_create_or_edit_page_show_correct_context(self):
@@ -165,6 +171,7 @@ class PostFormTests(TestCase):
         form_data = {
             'text': TEXT_EDIT,
             'group': self.group2.pk,
+            'image': self.uploaded2
         }
         for client in clients:
             with self.subTest(client=client):
@@ -174,11 +181,13 @@ class PostFormTests(TestCase):
                     follow=True,
                 )
                 self.assertEqual(response.status_code, HTTPStatus.OK)
+                self.assertNotEqual(self.post.author, self.user)
                 self.assertNotEqual(self.post.text, form_data['text'])
                 self.assertNotEqual(self.post.group.pk, form_data['group'])
+                self.assertNotEqual(self.post.image, form_data['image'])
 
     def test_guest_client_create_post(self):
-        posts_count = Post.objects.count()
+        Post.objects.all().delete()
         form_data = {
             'text': TEXT_CREATE,
             'group': self.group.pk,
@@ -189,10 +198,10 @@ class PostFormTests(TestCase):
             follow=True,
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertNotEqual(Post.objects.count(), posts_count + 1)
+        self.assertEqual(Post.objects.count(), 0)
 
     def test_guest_client_adding_comment(self):
-        comments_count = Comment.objects.count()
+        Comment.objects.all().delete()
         form_data = {
             'text': TEXT_COMMENT,
         }
@@ -202,4 +211,4 @@ class PostFormTests(TestCase):
             follow=True,
         )
         self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertNotEqual(Comment.objects.count(), comments_count + 1)
+        self.assertEqual(Comment.objects.count(), 0)
