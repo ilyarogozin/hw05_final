@@ -26,7 +26,7 @@
       {% endif %}
     </div>
     {% for post in page_obj %}
-      {% include "posts/includes/post.html" %}
+      {% include "posts/includes/post.html" with not_group_page=True %}
     {% endfor %}
     {% include "posts/includes/paginator.html" %}
   </div>
