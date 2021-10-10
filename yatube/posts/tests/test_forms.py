@@ -169,7 +169,7 @@ class PostFormTests(TestCase):
             content_type='image/gif'
         )
         text = self.post.text
-        group = self.post.group.pk
+        group = self.post.group
         image = self.post.image
         clients = [self.not_author_client, self.guest_client]
         form_data = {
@@ -187,7 +187,7 @@ class PostFormTests(TestCase):
                 self.assertEqual(response.status_code, HTTPStatus.OK)
                 self.assertEqual(self.post.author, self.user)
                 self.assertEqual(self.post.text, text)
-                self.assertEqual(self.post.group.pk, group)
+                self.assertEqual(self.post.group, group)
                 self.assertEqual(self.post.image, image)
 
     def test_guest_client_create_post(self):
