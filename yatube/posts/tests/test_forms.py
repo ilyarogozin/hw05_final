@@ -25,14 +25,6 @@ SMALL_GIF = (
     b'\x02\x00\x01\x00\x00\x02\x02\x0C'
     b'\x0A\x00\x3B'
 )
-SMALL2_GIF = (
-    b'\x47\x49\x46\x38\x39\x61'
-    b'\x01\x00\x80\x00\x00\x00'
-    b'\xFF\xFF\xFF\x21\xF9\x04'
-    b'\x00\x00\x00\x2C\x00\x00'
-    b'\x02\x00\x01\x00\x00\x02'
-    b'\x0A\x00\x3B'
-)
 TEXT_COMMENT = 'Текст коммент'
 TEXT_CREATE = 'Текст создать'
 TEXT_EDIT = 'Текст редактировать'
@@ -61,16 +53,6 @@ class PostFormTests(TestCase):
             description='Тест описание 2',
         )
         cls.form = PostForm()
-        cls.uploaded = SimpleUploadedFile(
-            name='small.gif',
-            content=SMALL_GIF,
-            content_type='image/gif'
-        )
-        cls.uploaded2 = SimpleUploadedFile(
-            name='small2.gif',
-            content=SMALL2_GIF,
-            content_type='image/gif'
-        )
 
     def setUp(self):
         self.post = Post.objects.create(
@@ -91,10 +73,15 @@ class PostFormTests(TestCase):
 
     def test_create_post(self):
         Post.objects.all().delete()
+        uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=SMALL_GIF,
+            content_type='image/gif'
+        )
         form_data = {
             'text': TEXT_CREATE,
             'group': self.group.pk,
-            'image': self.uploaded,
+            'image': uploaded,
         }
         response = self.authorized_client.post(
             POST_CREATE_URL,
@@ -108,15 +95,20 @@ class PostFormTests(TestCase):
         self.assertEqual(post.text, form_data['text'])
         self.assertEqual(post.group.pk, form_data['group'])
         self.assertEqual(
-            post.image.name, f'{ settings.UPLOAD_TO }{ self.uploaded.name }'
+            post.image.name, f'{ settings.UPLOAD_TO }{ uploaded.name }'
         )
         self.assertEqual(post.author, self.user)
 
     def test_edit_post(self):
+        uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=SMALL_GIF,
+            content_type='image/gif'
+        )
         form_data = {
             'text': TEXT_EDIT,
             'group': self.group2.pk,
-            'image': self.uploaded2,
+            'image': uploaded,
         }
         response = self.authorized_client.post(
             self.POST_EDIT_URL,
@@ -129,7 +121,7 @@ class PostFormTests(TestCase):
         self.assertEqual(post.text, form_data['text'])
         self.assertEqual(post.group.pk, form_data['group'])
         self.assertEqual(
-            post.image.name, f'{ settings.UPLOAD_TO }{ self.uploaded2.name }'
+            post.image.name, f'{ settings.UPLOAD_TO }{ uploaded.name }'
         )
         self.assertEqual(post.author, self.post.author)
 
@@ -171,6 +163,11 @@ class PostFormTests(TestCase):
         self.assertEqual(comment.post, self.post)
 
     def test_not_author_or_guest_client_edit_post(self):
+        uploaded = SimpleUploadedFile(
+            name='small.gif',
+            content=SMALL_GIF,
+            content_type='image/gif'
+        )
         text = self.post.text
         group = self.post.group.pk
         image = self.post.image
@@ -178,7 +175,7 @@ class PostFormTests(TestCase):
         form_data = {
             'text': TEXT_EDIT,
             'group': self.group2.pk,
-            'image': self.uploaded2
+            'image': uploaded
         }
         for client in clients:
             with self.subTest(client=client):
