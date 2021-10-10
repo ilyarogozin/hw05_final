@@ -110,6 +110,7 @@ if DEBUG:
     DEFAULT_FROM_EMAIL = 'testing@example.com'
 
 NUM_POSTS = 10
+UPLOAD_TO = 'posts/'
 
 CSRF_FAILURE_VIEW = 'core.views.csrf_failure'
 

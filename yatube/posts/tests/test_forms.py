@@ -107,7 +107,9 @@ class PostFormTests(TestCase):
         post = Post.objects.all()[0]
         self.assertEqual(post.text, form_data['text'])
         self.assertEqual(post.group.pk, form_data['group'])
-        self.assertEqual(post.image.name, f'posts/{ self.uploaded.name }')
+        self.assertEqual(
+            post.image.name, f'{ settings.UPLOAD_TO }{ self.uploaded.name }'
+        )
         self.assertEqual(post.author, self.user)
 
     def test_edit_post(self):
@@ -126,7 +128,9 @@ class PostFormTests(TestCase):
         post = response.context['post']
         self.assertEqual(post.text, form_data['text'])
         self.assertEqual(post.group.pk, form_data['group'])
-        self.assertEqual(post.image.name, f'posts/{ self.uploaded2.name }')
+        self.assertEqual(
+            post.image.name, f'{ settings.UPLOAD_TO }{ self.uploaded2.name }'
+        )
         self.assertEqual(post.author, self.post.author)
 
     def test_post_create_or_edit_page_show_correct_context(self):
