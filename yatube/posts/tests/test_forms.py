@@ -167,6 +167,9 @@ class PostFormTests(TestCase):
         self.assertEqual(comment.post, self.post)
 
     def test_not_author_or_guest_client_edit_post(self):
+        text = self.post.text
+        group = self.post.group.pk
+        image = self.post.image
         clients = [self.not_author_client, self.guest_client]
         form_data = {
             'text': TEXT_EDIT,
@@ -181,10 +184,10 @@ class PostFormTests(TestCase):
                     follow=True,
                 )
                 self.assertEqual(response.status_code, HTTPStatus.OK)
-                self.assertNotEqual(self.post.author, self.user)
-                self.assertNotEqual(self.post.text, form_data['text'])
-                self.assertNotEqual(self.post.group.pk, form_data['group'])
-                self.assertNotEqual(self.post.image, form_data['image'])
+                self.assertEqual(self.post.author, self.user)
+                self.assertEqual(self.post.text, text)
+                self.assertEqual(self.post.group.pk, group)
+                self.assertEqual(self.post.image, image)
 
     def test_guest_client_create_post(self):
         Post.objects.all().delete()
