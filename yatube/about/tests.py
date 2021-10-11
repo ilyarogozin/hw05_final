@@ -11,7 +11,6 @@ class StaticURLTests(TestCase):
     def test_about_urls_exists_at_desired_location(self):
         addresses = ('/about/author/',
                      '/about/tech/',)
-
         for address in addresses:
             with self.subTest(address=address):
                 response = self.guest_client.get(address)
@@ -22,7 +21,6 @@ class StaticURLTests(TestCase):
             '/about/author/': 'about/author.html',
             '/about/tech/': 'about/tech.html',
         }
-
         for address, template in addresses_of_templates.items():
             with self.subTest(address=address):
                 response = self.guest_client.get(address)
@@ -36,7 +34,6 @@ class StaticViewsTests(TestCase):
     def test_about_pages_accessible_by_name(self):
         addresses = (reverse('about:author'),
                      reverse('about:tech'),)
-
         for address in addresses:
             with self.subTest(address=address):
                 response = self.guest_client.get(address)
@@ -45,7 +42,6 @@ class StaticViewsTests(TestCase):
     def test_about_pages_uses_correct_template_by_name(self):
         addresses_of_templates = {reverse('about:author'): 'about/author.html',
                                   reverse('about:tech'): 'about/tech.html'}
-
         for address, template in addresses_of_templates.items():
             with self.subTest(address=address):
                 response = self.guest_client.get(address)
