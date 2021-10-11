@@ -168,9 +168,7 @@ class PostFormTests(TestCase):
             content=SMALL_GIF,
             content_type='image/gif'
         )
-        text = self.post.text
-        group = self.post.group
-        image = self.post.image
+        text, group, image = self.post.text, self.post.group, self.post.image
         clients = [self.not_author_client, self.guest_client]
         form_data = {
             'text': TEXT_EDIT,
