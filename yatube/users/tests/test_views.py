@@ -10,10 +10,8 @@ class UsersViewsTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='NoName')
-
-    def setUp(self):
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
+        cls.authorized_client = Client()
+        cls.authorized_client.force_login(cls.user)
 
     def test_pages_uses_correct_template(self):
         templates_page_names = {
@@ -27,7 +25,6 @@ class UsersViewsTests(TestCase):
             'users/password_reset_form.html',
             reverse('users:signup'): 'users/signup.html',
         }
-
         for reverse_name, template in templates_page_names.items():
             with self.subTest(reverse_name=reverse_name):
                 response = self.authorized_client.get(reverse_name)
@@ -41,7 +38,6 @@ class UsersViewsTests(TestCase):
             'username': forms.fields.CharField,
             'email': forms.fields.EmailField,
         }
-
         for value, expected in form_fields.items():
             with self.subTest(value=value):
                 form_field = response.context.get('form').fields.get(value)

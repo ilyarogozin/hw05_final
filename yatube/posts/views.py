@@ -49,10 +49,8 @@ def profile(request, username):
 def post_detail(request, post_id):
     form = CommentForm(request.POST or None)
     post = get_object_or_404(Post, pk=post_id)
-    comments = post.comments.all()
     context = {
         'post': post,
-        'comments': comments,
         'form': form,
     }
     return render(request, 'posts/post_detail.html', context)

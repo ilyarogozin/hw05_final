@@ -10,13 +10,10 @@ class UserCreateFormTests(TestCase):
         super().setUpClass()
         cls.user = User.objects.create_user(username='NoName')
         cls.form = CreationForm()
-
-    def setUp(self):
-        self.guest_client = Client()
+        cls.guest_client = Client()
 
     def test_create_user(self):
         users_count = User.objects.count()
-
         form_data = {
             'first_name': 'first name',
             'last_name': 'last name',
@@ -25,7 +22,6 @@ class UserCreateFormTests(TestCase):
             'password1': 'qpwoei1029',
             'password2': 'qpwoei1029',
         }
-
         response = self.guest_client.post(
             reverse('users:signup'),
             data=form_data,

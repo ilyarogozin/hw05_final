@@ -10,10 +10,8 @@ class UserURLTests(TestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.user = User.objects.create_user(username='NoName')
-
-    def setUp(self):
-        self.authorized_client = Client()
-        self.authorized_client.force_login(self.user)
+        cls.authorized_client = Client()
+        cls.authorized_client.force_login(cls.user)
 
     def test_urls_uses_correct_template(self):
         template_urls_name = {
@@ -23,7 +21,6 @@ class UserURLTests(TestCase):
             'users/password_reset_done.html': '/auth/password_reset/done/',
             'users/password_reset_form.html': '/auth/password_reset/',
         }
-
         for template, address in template_urls_name.items():
             with self.subTest(address=address):
                 response = self.authorized_client.get(address)
@@ -36,7 +33,6 @@ class UserURLTests(TestCase):
             '/auth/password_reset/done/',
             '/auth/password_reset/',
         )
-
         for address in urls_name:
             with self.subTest(address=address):
                 response = self.authorized_client.get(address)
