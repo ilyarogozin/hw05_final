@@ -175,9 +175,8 @@ class PostsViewsTests(TestCase):
             Follow.objects.filter(user=self.user, author=self.user2).exists()
         )
 
-    def test_new_record_appears_at_follower_feed_and_not_at_foreign_feed(self):
+    def test_new_record_not_appears_at_foreign_feed(self):
         foreign_page_obj = (
-            self.authorized_client2.get(FOLLOW_INDEX_URL).
-            context['page_obj']
+            self.authorized_client2.get(FOLLOW_INDEX_URL).context['page_obj']
         )
         self.assertNotIn(self.post, foreign_page_obj)
