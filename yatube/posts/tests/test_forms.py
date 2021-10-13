@@ -168,7 +168,8 @@ class PostFormTests(TestCase):
             content=SMALL_GIF,
             content_type='image/gif'
         )
-        text, group, image = self.post.text, self.post.group, self.post.image
+        user, text, group, image = (self.user, self.post.text,
+                                    self.post.group, self.post.image)
         clients = [self.not_author_client, self.guest_client]
         form_data = {
             'text': TEXT_EDIT,
@@ -183,7 +184,7 @@ class PostFormTests(TestCase):
                     follow=True,
                 )
                 self.assertEqual(response.status_code, HTTPStatus.OK)
-                self.assertEqual(self.post.author, self.user)
+                self.assertEqual(self.post.author, user)
                 self.assertEqual(self.post.text, text)
                 self.assertEqual(self.post.group, group)
                 self.assertEqual(self.post.image, image)
