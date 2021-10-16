@@ -10,8 +10,7 @@ from .models import Follow, Group, Post, User
 def get_page(request, objects_list):
     paginator = Paginator(objects_list, settings.NUM_POSTS)
     page_number = request.GET.get('page')
-    page_obj = paginator.get_page(page_number)
-    return page_obj
+    return paginator.get_page(page_number)
 
 
 def index(request):
