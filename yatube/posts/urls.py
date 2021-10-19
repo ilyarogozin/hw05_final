@@ -35,4 +35,7 @@ urlpatterns = [
     path('profile/<str:username>/unfollow/',
          views.profile_unfollow,
          name='profile_unfollow'),
+    path('create_group/',
+         views.group_create,
+         name='group_create'),
 ]

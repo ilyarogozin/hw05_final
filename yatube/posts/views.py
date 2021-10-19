@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 
-from .forms import CommentForm, PostForm
+from .forms import CommentForm, GroupForm, PostForm
 from .models import Follow, Group, Post, User
 
 
@@ -58,9 +58,8 @@ def post_detail(request, post_id):
 @login_required
 def post_create(request):
     form = PostForm(request.POST or None, files=request.FILES or None,)
-    template = 'posts/create_post.html'
     if not form.is_valid():
-        return render(request, template, {'form': form})
+        return render(request, 'posts/create_post.html', {'form': form})
     post = form.save(commit=False)
     post.author = request.user
     post.save()
@@ -77,9 +76,8 @@ def post_edit(request, post_id):
         files=request.FILES or None,
         instance=post,
     )
-    template = 'posts/create_post.html'
     if not form.is_valid():
-        return render(request, template, {
+        return render(request, 'posts/create_post.html', {
             'form': form,
             'is_edit': True,
             'post': post,
@@ -121,3 +119,13 @@ def follow_index(request):
     posts = Post.objects.filter(author__following__user=request.user)
     context = {'page_obj': get_page(request, posts)}
     return render(request, 'posts/follow.html', context)
+
+
+@login_required
+def group_create(request):
+    form = GroupForm(request.POST or None)
+    if not form.is_valid():
+        return render(request, 'posts/create_group.html', {'form': form})
+    group = form.save(commit=False)
+    group.save()
+    return redirect('posts:profile', request.user.username)

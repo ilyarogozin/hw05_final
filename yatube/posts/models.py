@@ -8,9 +8,20 @@ User = get_user_model()
 
 
 class Group(models.Model):
-    title = models.CharField(max_length=200, verbose_name='Название группы')
-    slug = models.SlugField(unique=True, verbose_name='Уникальный URL-ярлык')
-    description = models.TextField(verbose_name='Описание')
+    title = models.CharField(
+        max_length=200,
+        verbose_name='Название группы',
+        help_text='Введите название группы',
+    )
+    slug = models.SlugField(
+        unique=True,
+        verbose_name='Уникальный URL-ярлык',
+        help_text='Введите адресную метку группы',
+    )
+    description = models.TextField(
+        verbose_name='Описание',
+        help_text='Введите краткое описание группы',
+    )
 
     class Meta:
         verbose_name = 'Группа'
@@ -97,3 +108,7 @@ class Follow(models.Model):
     class Meta:
         verbose_name = 'Подписка'
         verbose_name_plural = 'Подписки'
+
+    def __str__(self):
+        return (f'Подписчик: { self.user }\n'
+                f'Автор: { self.author }')
