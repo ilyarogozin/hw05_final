@@ -129,3 +129,11 @@ def group_create(request):
     group = form.save(commit=False)
     group.save()
     return redirect('posts:profile', request.user.username)
+
+
+@login_required
+def delete_post(request, post_id):
+    post = get_object_or_404(Post, pk=post_id)
+    if request.user == post.author and request.user.is_authenticated:
+        post.delete()
+    return redirect('posts:profile', request.user.username)

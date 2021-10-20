@@ -38,4 +38,7 @@ urlpatterns = [
     path('create_group/',
          views.group_create,
          name='group_create'),
+    path('delete_post/<int:post_id>/',
+         views.delete_post,
+         name='delete_post'),
 ]
