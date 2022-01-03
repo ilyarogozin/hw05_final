@@ -1,9 +1,13 @@
 import os
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 
-SECRET_KEY = '*f95tqs5cw$6k-9-rbhr&$=23huw%^oo28h7ge036))feadcro'
+SECRET_KEY = os.getenv('SECRET_KEY')
 
 DEBUG = True
 
