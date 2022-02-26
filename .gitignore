@@ -102,6 +102,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
+.env
 .venv
 env/
 venv/
@@ -146,4 +147,6 @@ dmypy.json
 
 # папки со статикой и медиа
 yatube/posts/static/
-
+static/
+yatube/static/
+yatube/media/

@@ -1,6 +1,14 @@
 import os
 
 from dotenv import load_dotenv
+import sentry_sdk
+from sentry_sdk.integrations.django import DjangoIntegration
+
+sentry_sdk.init(
+    dsn="https://81dcf7ccd4bf46d2add52af73c86e362@o1153816.ingest.sentry.io/6233457", 
+    integrations=[DjangoIntegration()],
+)
+
 
 load_dotenv()
 
@@ -9,15 +17,13 @@ TEMPLATES_DIR = os.path.join(BASE_DIR, 'templates')
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
-    'testserver',
-    '[::1]',
-    'www.rogozinilya.pythonanywhere.com',
-    'rogozinilya.pythonanywhere.com',
+    'ilyarogozinproject.ddns.net',
+    '62.84.117.55'
 ]
 
 INSTALLED_APPS = [
@@ -73,10 +79,14 @@ WSGI_APPLICATION = 'yatube.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': os.getenv('DB_ENGINE', 'django.db.backends.postgresql'),
+        'NAME': os.getenv('DB_NAME'),
+        'USER': os.getenv('POSTGRES_USER'),
+        'PASSWORD': os.getenv('POSTGRES_PASSWORD'),
+        'HOST': os.getenv('DB_HOST'),
+        'PORT': os.getenv('DB_PORT')
     }
-}
+} 
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -104,9 +114,10 @@ USE_L10N = True
 USE_TZ = True
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'),
-]
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+# STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, 'static'),
+# ]
 
 LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'posts:index'
