@@ -1,22 +1,35 @@
-# hw05_final
-
-[![CI](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml/badge.svg?branch=master)](https://github.com/yandex-praktikum/hw05_final/actions/workflows/python-app.yml)
-
-# yatube_project
-### Описание
-Социальная сеть блогеров
+# YATUBE
+## yatube - учебный проект социальной сети блогеров
+### Авторы:
+- Ilya Rogozin https://github.com/ilyarogozin
 ### Технологии
-Python 3.9.6
-Django 2.2.19
-### Запуск проекта в dev-режиме
-- Установите и активируйте виртуальное окружение
-- Установите зависимости из файла requirements.txt
+- Python 3
+- Django 2
+
+### Запуск проекта в dev-режиме:
+- Клонируйте репозиторий:
+```
+git clone git@github.com:ilyarogozin/yatube.git
+```
+
+- Перейдите в папку проекта:
+```
+cd yatube/
+```
+
+- Создайте и запустите окружение:
+```
+python3 -m venv venv && source venv/bin/activate
+```
+
+- Установите зависимости:
 ```
 pip install -r requirements.txt
 ```
+
 - В папке с файлом manage.py выполните команду:
 ```
 python3 manage.py runserver
 ```
-### Авторы
-Илья Рогозин
+
+- Перейдите на сайт http://127.0.0.1:8000/
