@@ -1,5 +1,5 @@
 # YATUBE
-## yatube - учебный проект социальной сети блогеров
+## yatube - проект социальной сети блогеров
 ### Авторы:
 - Ilya Rogozin https://github.com/ilyarogozin
 ### Технологии
